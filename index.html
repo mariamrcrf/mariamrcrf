@@ -27,8 +27,87 @@
   </script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;-webkit-tap-highlight-color:transparent;}
-    body{background:radial-gradient(circle at top left,#3a0ca3,#7209b7,#b5179e);min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;}
-    .container{width:100%;max-width:500px;background:#111827;border-radius:20px;padding:20px;box-shadow:0 0 25px rgba(255,105,180,0.3),0 0 40px rgba(0,0,0,0.6);overflow:hidden;position:relative;}
+    body{background:radial-gradient(circle at top left,#3a0ca3,#7209b7,#b5179e);min-height:100vh;padding:20px;display:flex;flex-direction:column;align-items:center;color:white;overflow-x:hidden;position:relative;}
+    
+    /* Animações de fundo - corações e palavra PAZ */
+    .background-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .heart {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      opacity: 0.7;
+      pointer-events: none;
+      background-color: #ff80ab;
+      transform: rotate(45deg);
+    }
+    
+    .heart:before, .heart:after {
+      content: '';
+      background-color: #ff80ab;
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+    }
+    
+    .heart:before {
+      top: -50%;
+      left: 0;
+    }
+    
+    .heart:after {
+      top: 0;
+      left: 50%;
+    }
+    
+    .peace-text {
+      position: absolute;
+      font-size: 120px;
+      font-weight: bold;
+      color: rgba(255, 255, 255, 0.1);
+      pointer-events: none;
+      animation: peaceFloat 25s infinite ease-in-out;
+      z-index: -1;
+      text-shadow: 0 0 10px rgba(255, 128, 171, 0.3);
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes peaceFloat {
+      0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+      25% {
+        transform: translate(40vw, 30vh) rotate(5deg);
+      }
+      50% {
+        transform: translate(10vw, 60vh) rotate(-5deg);
+      }
+      75% {
+        transform: translate(-30vw, 40vh) rotate(3deg);
+      }
+    }
+    
+    .container{width:100%;max-width:500px;background:#111827;border-radius:20px;padding:20px;box-shadow:0 0 25px rgba(255,105,180,0.3),0 0 40px rgba(0,0,0,0.6);overflow:hidden;position:relative;z-index:1;margin:20px 0;}
     .container::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#ff80ab,#f48fb1,#ff80ab);box-shadow:0 0 20px #ff80ab;}
     .header{text-align:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid rgba(255,255,255,0.2);}
     h1{color:#ff80ab;margin-bottom:8px;font-size:26px;text-transform:uppercase;letter-spacing:1.5px;text-shadow:0 0 8px #ff80ab,0 0 12px #f48fb1;}
@@ -59,7 +138,7 @@
     .btn-no:hover{transform:scale(1.05);box-shadow:0 0 30px #ff5252;}
     .no-winner{font-style:italic;color:#f8bbd0;}
     #winnerNumber{font-size:18px;color:#ff80ab;font-weight:bold;text-shadow:0 0 8px #f48fb1;}
-    .footer-note{text-align:center;margin-top:20px;color:#f8bbd0;font-size:14px;text-shadow:0 0 8px #ff80ab;}
+    .footer-note{text-align:center;margin-top:20px;color:#f8bbd0;font-size:14px;text-shadow:0 0 8px #ff80ab;position:relative;z-index:1;padding:20px;}
     .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.85);z-index:1000;justify-content:center;align-items:center;}
     .modal-content{background-color:#111827;padding:20px;border-radius:12px;max-width:90%;max-height:90%;text-align:center;box-shadow:0 0 25px #ff80ab;}
     .modal h2{color:#ff80ab;text-shadow:0 0 8px #f48fb1;}
@@ -69,6 +148,9 @@
   </style>
 </head>
 <body>
+  <!-- Elemento para animação de fundo -->
+  <div class="background-animation" id="backgroundAnimation"></div>
+  
   <div class="container">
   <div class="header">
     <h1>RIFA RESPONSÁVEL MARIA</h1>
@@ -123,6 +205,9 @@ function init() {
   document.getElementById("btnNo").addEventListener("click", cancelSelection);
   document.getElementById("showWinnerBtn").addEventListener("click", showWinner);
   document.getElementById("closeModal").addEventListener("click", closeWinnerModal);
+  
+  // Iniciar animação de fundo
+  createBackgroundAnimation();
 }
 
 function parseReservedGroups(reservedString) {
@@ -224,6 +309,61 @@ function generateRandomId(length=6){const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ01234
 
 function showWinner(){document.getElementById('winnerModal').style.display='flex';}
 function closeWinnerModal(){document.getElementById('winnerModal').style.display='none';}
+
+// Função para criar a animação de fundo
+function createBackgroundAnimation() {
+  const animationContainer = document.getElementById('backgroundAnimation');
+  
+  // Criar a palavra PAZ em várias posições
+  for (let i = 0; i < 5; i++) {
+    const peace = document.createElement('div');
+    peace.className = 'peace-text';
+    peace.textContent = 'PAZ';
+    peace.style.left = Math.random() * 80 + 'vw';
+    peace.style.top = Math.random() * 80 + 'vh';
+    peace.style.animationDelay = (Math.random() * 5) + 's';
+    animationContainer.appendChild(peace);
+  }
+  
+  // Criar corações
+  for (let i = 0; i < 30; i++) {
+    createHeart(animationContainer);
+  }
+}
+
+function createHeart(container) {
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  
+  // Posição aleatória
+  const left = Math.random() * 100;
+  heart.style.left = left + 'vw';
+  heart.style.bottom = '-50px';
+  
+  // Tamanho aleatório
+  const size = Math.random() * 15 + 10;
+  heart.style.width = size + 'px';
+  heart.style.height = size + 'px';
+  
+  // Cor aleatória (tons de rosa)
+  const hue = Math.floor(Math.random() * 20) + 320; // Entre 320-340 (tons de rosa)
+  const color = `hsl(${hue}, 100%, 70%)`;
+  heart.style.backgroundColor = color;
+  
+  // Duração e delay aleatórios
+  const duration = Math.random() * 10 + 10;
+  const delay = Math.random() * 5;
+  
+  heart.style.animation = `float ${duration}s linear ${delay}s infinite`;
+  
+  container.appendChild(heart);
+  
+  // Remover o coração após a animação terminar e criar um novo
+  setTimeout(() => {
+    heart.remove();
+    createHeart(container);
+  }, (duration + delay) * 1000);
+}
 
 document.addEventListener("DOMContentLoaded", init);
 </script>
